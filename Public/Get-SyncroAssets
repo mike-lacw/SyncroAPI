@@ -1,0 +1,52 @@
+function Get-SyncroCustomers {
+	[CmdletBinding()]
+	Param (
+		[Int]$CustomerId = '',
+        [Int]$AssetTypeId = '',
+		[String]$Query = '',
+        [ValidateSet("Enabled", "Disabled", '', IgnoreCase=$false)]
+		[String]$SNMPStatus = '',
+		[Int]$Id = ''
+	
+	)
+
+
+	if ($Id) {
+		$Company = Invoke-SyncroRequest -Method get -Resource "customers/$Id"
+		return $Company
+	} else {
+	
+		$ResourceFilter = ''
+	
+		if ($CustomerId) {
+			$ResourceFilter = "$($ResourceFilter)&customer_id=$($CustomerId)"
+		}
+	
+		if ($Query) {
+			$ResourceFilter = "$($ResourceFilter)&query=$($Query)"
+		}
+	
+		if ($AssetTypeId) {
+			$ResourceFilter = "$($ResourceFilter)&asset_type_id=$($AssetTypeId)"
+		}
+		
+		if ($SNMPStatus) {
+            if($SNMPStatus = "Enabled"){
+			    $ResourceFilter = "$($ResourceFilter)&snmp_enabled=true"
+            }else{
+                $ResourceFilter = "$($ResourceFilter)&snmp_enabled=false"
+            }
+		}
+	
+	
+		$i = 1;
+		$AllAssets = do {
+			$Assets = Invoke-SyncroRequest -Method get -Resource "customer_assets?page=$i$($ResourceFilter)"
+			$i++
+			$Assets.assets
+		} while ($Assets.assets.count % 100 -eq 0 -and $Assets.assets.count -ne 0)
+					
+		return $AllAssets
+	
+	}
+}

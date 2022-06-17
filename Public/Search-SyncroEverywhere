@@ -1,0 +1,10 @@
+function Search-SyncroEverywhere {
+	[CmdletBinding()]
+	Param (
+        [Parameter(Mandatory = $true)]
+		[String]$Query = ''
+	)
+
+    Invoke-SyncroRequest -Method "get" -Resource "search?query=$($Query)"
+}
+
